@@ -1,0 +1,539 @@
+// import React from 'react';
+// import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+// import L from 'leaflet';
+// import 'leaflet/dist/leaflet.css';
+// import gymIcon from '../../assets/gum.png';
+// import TopNav from "../../components/navigation/TopNav";
+// import BottomNav from "../../components/navigation/BottomNav"; // Замена иконки тренажёрной площадки
+//
+// // Координаты центра Бишкека
+// const bishkekCenter = [42.8746, 74.6122];
+//
+// // Пример маршрута для бега (по улицам Бишкека)
+// const runningRoute = [
+//     [42.8746, 74.6122],  // Начало маршрута
+//     [42.8769, 74.6098],
+//     [42.8792, 74.6114],
+//     [42.8799, 74.6154],
+//     [42.8774, 74.6181]
+// ];
+//
+// // Пример тренажёрных площадок (с координатами площадок в Бишкеке)
+// const gymLocations = [
+//     [42.8753, 74.6128],  // Площадка в парке Панфилова
+//     [42.8804, 74.6142],  // Площадка в парке Ататюрка
+//     [42.8739, 74.6042],  // Спортплощадка на юге
+// ];
+//
+// // Создание кастомной иконки для тренажёрных площадок
+// const gymMarkerIcon = L.icon({
+//     iconUrl: gymIcon,
+//     iconSize: [25, 25],    // Размер иконки
+//     iconAnchor: [12, 12],  // Точка привязки иконки
+//     popupAnchor: [0, -12], // Точка появления popup над иконкой
+// });
+//
+// const MapPage = () => {
+//     return (
+//       <div>
+//           <TopNav />
+//           <MapContainer center={bishkekCenter} zoom={14} style={{ height: '70vh', width: '100%' }}>
+//               {/* Подключаем слой карты от OpenStreetMap */}
+//               <TileLayer
+//                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+//                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+//               />
+//
+//               {/* Маркер для старта маршрута */}
+//               <Marker position={bishkekCenter}>
+//                   <Popup>Старт маршрута для бега в центре Бишкека!</Popup>
+//               </Marker>
+//
+//               {/* Маршрут для бега */}
+//               <Polyline positions={runningRoute} color="blue" />
+//
+//               {/* Тренажёрные площадки */}
+//               {gymLocations.map((gym, index) => (
+//                   <Marker key={index} position={gym} icon={gymMarkerIcon}>
+//                       <Popup>Тренажёрная площадка</Popup>
+//                   </Marker>
+//               ))}
+//           </MapContainer>
+//           <BottomNav />
+//       </div>
+//     );
+// };
+//
+// export default MapPage;
+//
+//
+// // import React from 'react';
+// // import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+// // import 'leaflet/dist/leaflet.css';
+// //
+// // const MapPage = () => {
+// //     const position = [51.505, -0.09]; // Центральные координаты для начального отображения карты
+// //
+// //     return (
+// //         <MapContainer center={position} zoom={13} style={{ height: '100vh', width: '100%' }}>
+// //             <TileLayer
+// //                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+// //                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+// //             />
+// //             <Marker position={position}>
+// //                 <Popup>
+// //                     Место для тренировки! <br /> Это ваша первая точка на карте.
+// //                 </Popup>
+// //             </Marker>
+// //         </MapContainer>
+// //     );
+// // };
+// //
+// // export default MapPage;
+
+
+
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import gymIcon from '../../assets/gum.png';
+import TopNav from "../../components/navigation/TopNav";
+import BottomNav from "../../components/navigation/BottomNav"; // Замена иконки тренажёрной площадки
+
+// Координаты центра Бишкека
+const bishkekCenter = [42.8746, 74.6122];
+
+// Пример маршрута для бега (по улицам Бишкека)
+const runningRoute = [
+    [42.8746, 74.6122],  // Начало маршрута
+    [42.8769, 74.6098],
+    [42.8792, 74.6114],
+    [42.8799, 74.6154],
+    [42.8774, 74.6181]
+];
+
+// Пример тренажёрных площадок (с координатами площадок в Бишкеке)
+const gymLocations = [
+    [42.8753, 74.6128],  // Площадка в парке Панфилова
+    [42.8804, 74.6142],  // Площадка в парке Ататюрка
+    [42.8739, 74.6042],  // Спортплощадка на юге
+];
+
+// Создание кастомной иконки для тренажёрных площадок
+const gymMarkerIcon = L.icon({
+    iconUrl: gymIcon,
+    iconSize: [25, 25],    // Размер иконки
+    iconAnchor: [12, 12],  // Точка привязки иконки
+    popupAnchor: [0, -12], // Точка появления popup над иконкой
+});
+
+// Компонент для автоматического перемещения карты на местоположение пользователя
+const LocationMarker = () => {
+    const [position, setPosition] = useState(null);
+    const map = useMap();
+
+    useEffect(() => {
+        map.locate().on("locationfound", (e) => {
+            setPosition(e.latlng);
+            map.flyTo(e.latlng, map.getZoom()); // Перемещаем карту на координаты пользователя
+        });
+    }, [map]);
+
+    return position === null ? null : (
+        <Marker position={position}>
+            <Popup>You are here</Popup>
+        </Marker>
+    );
+};
+
+const MapPage = () => {
+    return (
+     <div>
+         <MapContainer center={bishkekCenter} zoom={14} style={{ height: '70vh', width: '100%' }}>
+             {/* Подключаем слой карты от OpenStreetMap */}
+             <TileLayer
+                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+             />
+
+             {/* Маркер для старта маршрута */}
+             <Marker position={bishkekCenter}>
+                 <Popup>Старт маршрута для бега в центре Бишкека!</Popup>
+             </Marker>
+
+             {/* Маршрут для бега */}
+             <Polyline positions={runningRoute} color="blue" />
+
+             {/* Тренажёрные площадки */}
+             {gymLocations.map((gym, index) => (
+                 <Marker key={index} position={gym} icon={gymMarkerIcon}>
+                     <Popup>Тренажёрная площадка</Popup>
+                 </Marker>
+             ))}
+
+             {/* Геолокация пользователя */}
+             <LocationMarker />
+         </MapContainer>
+     </div>
+    );
+};
+
+export default MapPage;
+
+
+
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import gymIcon from '../../assets/gum.png';
+import TopNav from "../../components/navigation/TopNav";
+import BottomNav from "../../components/navigation/BottomNav"; // Замена иконки тренажёрной площадки
+
+// Координаты центра Бишкека
+const bishkekCenter = [42.8746, 74.6122];
+
+// Пример маршрута для бега (по улицам Бишкека)
+const runningRoute = [
+    [42.8746, 74.6122],  // Начало маршрута
+    [42.8769, 74.6098],
+    [42.8792, 74.6114],
+    [42.8799, 74.6154],
+    [42.8774, 74.6181]
+];
+
+// Пример тренажёрных площадок (с координатами площадок в Бишкеке)
+const gymLocations = [
+    [42.8753, 74.6128],  // Площадка в парке Панфилова
+    [42.8804, 74.6142],  // Площадка в парке Ататюрка
+    [42.8739, 74.6042],  // Спортплощадка на юге
+];
+
+// Создание кастомной иконки для тренажёрных площадок
+const gymMarkerIcon = L.icon({
+    iconUrl: gymIcon,
+    iconSize: [25, 25],    // Размер иконки
+    iconAnchor: [12, 12],  // Точка привязки иконки
+    popupAnchor: [0, -12], // Точка появления popup над иконкой
+});
+
+// Компонент для автоматического перемещения карты на местоположение пользователя
+const LocationMarker = () => {
+    const [position, setPosition] = useState(null);
+    const map = useMap();
+
+    useEffect(() => {
+        map.locate().on("locationfound", (e) => {
+            setPosition(e.latlng);
+            map.flyTo(e.latlng, map.getZoom()); // Перемещаем карту на координаты пользователя
+        });
+    }, [map]);
+
+    return position === null ? null : (
+        <Marker position={position}>
+            <Popup>You are here</Popup>
+        </Marker>
+    );
+};
+
+const MapPage = () => {
+    return (
+     <div>
+         <TopNav />
+         <MapContainer center={bishkekCenter} zoom={14} style={{ height: '70vh', width: '100%' }}>
+             {/* Подключаем слой карты от OpenStreetMap */}
+             <TileLayer
+                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+             />
+
+             {/* Маркер для старта маршрута */}
+             <Marker position={bishkekCenter}>
+                 <Popup>Старт маршрута для бега в центре Бишкека!</Popup>
+             </Marker>
+
+             {/* Маршрут для бега */}
+             <Polyline positions={runningRoute} color="blue" />
+
+             {/* Тренажёрные площадки */}
+             {gymLocations.map((gym, index) => (
+                 <Marker key={index} position={gym} icon={gymMarkerIcon}>
+                     <Popup>Тренажёрная площадка</Popup>
+                 </Marker>
+             ))}
+
+             {/* Геолокация пользователя */}
+             <LocationMarker />
+         </MapContainer>
+         <BottomNav />
+     </div>
+    );
+};
+
+export default MapPage;
+
+
+
+
+// import React, { useState, useEffect } from 'react';
+// import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+// import L from 'leaflet';
+// import 'leaflet/dist/leaflet.css';
+// import gymIcon from '../../assets/gum.png';
+// import TopNav from "../../components/navigation/TopNav";
+// import BottomNav from "../../components/navigation/BottomNav";
+//
+// // Координаты центра Бишкека
+// const bishkekCenter = [42.8746, 74.6122];
+//
+// // Пример маршрута для бега (по улицам Бишкека)
+// const runningRoute = [
+//     [42.8746, 74.6122],  // Начало маршрута
+//     [42.8769, 74.6098],
+//     [42.8792, 74.6114],
+//     [42.8799, 74.6154],
+//     [42.8774, 74.6181]
+// ];
+//
+// // Пример тренажёрных площадок (с координатами площадок в Бишкеке)
+// const gymLocations = [
+//     [42.8753, 74.6128],  // Площадка в парке Панфилова
+//     [42.8804, 74.6142],  // Площадка в парке Ататюрка
+//     [42.8739, 74.6042],  // Спортплощадка на юге
+// ];
+//
+// // Создание кастомной иконки для тренажёрных площадок
+// const gymMarkerIcon = L.icon({
+//     iconUrl: gymIcon,
+//     iconSize: [25, 25],    // Размер иконки
+//     iconAnchor: [12, 12],  // Точка привязки иконки
+//     popupAnchor: [0, -12], // Точка появления popup над иконкой
+// });
+//
+// // Компонент для автоматического перемещения карты на местоположение пользователя
+// const LocationMarker = () => {
+//     const [position, setPosition] = useState(null);
+//     const map = useMap();
+//
+//     useEffect(() => {
+//         map.locate().on("locationfound", (e) => {
+//             setPosition(e.latlng);
+//             map.flyTo(e.latlng, map.getZoom()); // Перемещаем карту на координаты пользователя
+//         });
+//     }, [map]);
+//
+//     return position === null ? null : (
+//         <Marker position={position}>
+//             <Popup>You are here</Popup>
+//         </Marker>
+//     );
+// };
+//
+// const MapPage = () => {
+//     return (
+//         <div>
+//             <TopNav />
+//             <MapContainer center={bishkekCenter} zoom={14} style={{ height: '70vh', width: '100%' }}>
+//                 {/* Подключаем слой карты от OpenStreetMap */}
+//                 <TileLayer
+//                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+//                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+//                 />
+//
+//                 {/* Маркер для старта маршрута */}
+//                 <Marker position={bishkekCenter}>
+//                     <Popup>Старт маршрута для бега в центре Бишкека!</Popup>
+//                 </Marker>
+//
+//                 {/* Маршрут для бега */}
+//                 <Polyline positions={runningRoute} color="blue" />
+//
+//                 {/* Тренажёрные площадки */}
+//                 {gymLocations.map((gym, index) => (
+//                     <Marker key={index} position={gym} icon={gymMarkerIcon}>
+//                         <Popup>Тренажёрная площадка</Popup>
+//                     </Marker>
+//                 ))}
+//
+//                 {/* Геолокация пользователя */}
+//                 <LocationMarker />
+//             </MapContainer>
+//             <BottomNav />
+//         </div>
+//     );
+// };
+//
+// export default MapPage;
+
+
+// // Кастомные кнопки для управления масштабом карты
+// const ZoomControl = () => {
+//     const map = useMap();
+//
+//     return (
+//         <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 1000 }}>
+//             <button
+//                 onClick={() => map.zoomIn()}
+//                 style={{ margin: '5px', padding: '10px' }}
+//             >
+//                 Увеличить
+//             </button>
+//             <button
+//                 onClick={() => map.zoomOut()}
+//                 style={{ margin: '5px', padding: '10px' }}
+//             >
+//                 Уменьшить
+//             </button>
+//         </div>
+//     );
+// };
+
+
+
+// import React, { useState, useEffect } from 'react';
+// import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+// import L from 'leaflet';
+// import 'leaflet/dist/leaflet.css';
+// import gymIcon from '../../assets/gym.png';  // Иконка для тренажёрной площадки
+// import userLocationIcon from '../../assets/location.png'; // Иконка для текущего местоположения
+// import TopNav from "../../components/navigation/TopNav";
+// import BottomNav from "../../components/navigation/BottomNav";
+//
+// // Координаты центра Бишкека
+// const bishkekCenter = [42.8746, 74.6122];
+//
+// // Пример маршрута для бега (по улицам Бишкека)
+// const runningRoute = [
+//     [42.8746, 74.6122],  // Начало маршрута
+//     [42.8769, 74.6098],
+//     [42.8792, 74.6114],
+//     [42.8799, 74.6154],
+//     [42.8774, 74.6181]
+// ];
+//
+// // Пример тренажёрных площадок (с координатами площадок в Бишкеке)
+// const gymLocations = [
+//     [42.8753, 74.6128],  // Площадка в парке Панфилова
+//     [42.8804, 74.6142],  // Площадка в парке Ататюрка
+//     [42.8739, 74.6042],  // Спортплощадка на юге
+// ];
+//
+// // Создание кастомной иконки для тренажёрных площадок
+// const gymMarkerIcon = L.icon({
+//     iconUrl: gymIcon,
+//     iconSize: [25, 25],    // Размер иконки
+//     iconAnchor: [12, 12],  // Точка привязки иконки
+//     popupAnchor: [0, -12], // Точка появления popup над иконкой
+// });
+//
+// // Создание кастомной иконки для геолокации пользователя
+// const userLocationMarkerIcon = L.icon({
+//     iconUrl: userLocationIcon,
+//     iconSize: [30, 30],    // Размер иконки
+//     iconAnchor: [15, 15],  // Точка привязки иконки
+//     popupAnchor: [0, -15], // Точка появления popup над иконкой
+// });
+//
+// // Компонент для автоматического перемещения карты на местоположение пользователя
+// const LocationMarker = () => {
+//     const [position, setPosition] = useState(null);
+//     const map = useMap();
+//
+//     useEffect(() => {
+//         map.locate().on("locationfound", (e) => {
+//             setPosition(e.latlng);
+//             map.flyTo(e.latlng, map.getZoom()); // Перемещаем карту на координаты пользователя
+//         });
+//     }, [map]);
+//
+//     return position === null ? null : (
+//         <Marker position={position} icon={userLocationMarkerIcon}>
+//             <Popup>Это ваше местоположение</Popup>
+//         </Marker>
+//     );
+// };
+//
+// // Компонент с кнопкой для возврата на текущее местоположение
+// const RecenterButton = ({ position }) => {
+//     const map = useMap();  // Здесь мы используем хук useMap() правильно, внутри MapContainer
+//
+//     const handleClick = () => {
+//         if (position) {
+//             map.flyTo(position, 14); // Возвращаем карту к текущему местоположению пользователя
+//         }
+//     };
+//
+//     return (
+//         <button
+//             style={{
+//                 position: 'absolute',
+//                 bottom: '20px',
+//                 left: '20px',
+//                 zIndex: 1000,
+//                 backgroundColor: 'white',
+//                 padding: '10px',
+//                 borderRadius: '5px',
+//                 cursor: 'pointer'
+//             }}
+//             onClick={handleClick}
+//         >
+//             Моя геолокация
+//         </button>
+//     );
+// };
+//
+// const MapPage = () => {
+//     const [userPosition, setUserPosition] = useState(null);
+//
+//     return (
+//         <div style={{ position: 'relative' }}>
+//             {/*<TopNav />*/}
+//             <MapContainer    center={bishkekCenter} zoom={14} style={{ height: '90vh', width: '100%' }}>
+//                 {/* Подключаем слой карты от OpenStreetMap */}
+//                 <TileLayer
+//                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+//                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+//                 />
+//
+//                 {/* Маркер для старта маршрута */}
+//                 <Marker position={bishkekCenter}>
+//                     <Popup>Старт маршрута для бега в центре Бишкека!</Popup>
+//                 </Marker>
+//
+//                 {/* Маршрут для бега */}
+//                 <Polyline positions={runningRoute} color="blue" />
+//
+//                 {/* Тренажёрные площадки */}
+//                 {gymLocations.map((gym, index) => (
+//                     <Marker key={index} position={gym} icon={gymMarkerIcon}>
+//                         <Popup>Тренажёрная площадка</Popup>
+//                     </Marker>
+//                 ))}
+//
+//                 {/* Геолокация пользователя */}
+//                 <LocationMarker setUserPosition={setUserPosition} />
+//
+//                 {/* Кнопка для возврата к текущей геолокации */}
+//                 <RecenterButton position={userPosition} />
+//             </MapContainer>
+//             <BottomNav />
+//         </div>
+//     );
+// };
+//
+// export default MapPage;
+
+
+
+
+<h1>{t('welcome')}</h1>
+                <p>{t('language')}</p>
+
+
+                    const { t } = useTranslation();
+import { useTranslation } from 'react-i18next';

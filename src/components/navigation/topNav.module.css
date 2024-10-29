@@ -1,0 +1,16 @@
+.nav {
+    border-bottom: 1px solid #666666;
+    width: 100%;
+}
+
+.nav_flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    width: 120px;
+    height: auto;
+    object-fit: cover;
+}
