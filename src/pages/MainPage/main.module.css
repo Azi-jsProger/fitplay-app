@@ -4,3 +4,21 @@
     flex-direction: column;
     justify-content: space-between;
 }
+
+.main {
+    height: 100%;
+}
+
+.task {
+    width: 100%;
+    height: 60px;
+    background: #108c70;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    text-align: center;
+    color: #108c70;
+}

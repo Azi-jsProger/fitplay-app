@@ -2,13 +2,13 @@ import React, {useEffect, useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
-import BottomNav from "../../components/navigation/BottomNav";
-import {logout} from '../../redux/slices/userSlice';
-import TopNav from "../../components/navigation/TopNav";
+import BottomNav from "../../../components/navigation/BottomNav";
+import {logout} from '../../../redux/slices/userSlice';
+import TopNav from "../../../components/navigation/TopNav";
 import cls from './profile.module.css';
-import ProfileModal from './ProfileModal'; // Импортируем модалку
+import ProfileModal from '../ProfileModal/ProfileModal'; // Импортируем модалку
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Loader from "../../components/loader/loader";
+import Loader from "../../../components/loader/loader";
 
 
 const ProfilePage = () => {

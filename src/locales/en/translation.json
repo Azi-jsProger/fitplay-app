@@ -4,6 +4,7 @@
   "navHome": "Home",
   "navMap": "Map",
   "navForm": "Form",
-  "navProfile": "Profile"
-
+  "navProfile": "Profile",
+  "achievement": "achievement",
+  "step": "step"
 }

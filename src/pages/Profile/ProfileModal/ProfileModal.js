@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import './ProfileModal.css'
+import Button from "../../../components/MaterialButton/button";
+import ButtonMaterial from "../../../components/MaterialButton/button";
 
 const ProfileModal = ({ isOpen, onRequestClose, userId, token, onLogout, onAvatarUpdate }) => {
     const [avatarUrl, setAvatarUrl] = useState('');
@@ -29,13 +31,14 @@ const ProfileModal = ({ isOpen, onRequestClose, userId, token, onLogout, onAvata
         <Modal isOpen={isOpen} onRequestClose={onRequestClose} className="modal" overlayClassName="overlay">
             <h2>Change Avatar</h2>
             <input
+                className='input_search'
                 type="text"
                 placeholder="Enter image URL"
                 value={avatarUrl}
                 onChange={(e) => setAvatarUrl(e.target.value)}
             />
-            <button onClick={handleChangeAvatar}>Update Avatar</button>
-            <button onClick={handleLogout}>Logout</button>
+            <ButtonMaterial onClick={handleChangeAvatar} variant={'outlined'} text={'Update Avatar'} />
+            <ButtonMaterial onClick={handleLogout}  variant={'outlined'} color={'error'} text={"Logout"} />
         </Modal>
     );
 };

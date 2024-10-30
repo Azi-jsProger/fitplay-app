@@ -5,7 +5,7 @@ import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import LoginPage from "../pages/LoginPage/LoginPage";
 import SettingsPage from "../pages/SettingsPage/SettingsPage";
 import MapPage from "../pages/MapPage/MapPage";
-import ProfilePage from "../pages/ProfilePage/ProfilePage";
+import ProfilePage from "../pages/Profile/ProfilePage/ProfilePage";
 import Form from "../pages/Form/Form";
 import NotificationsPage from "../pages/NotificationsPage/NotificationsPage";
 

@@ -1,0 +1,24 @@
+.health {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.health div{
+    width: 140px;
+    height: 155px;
+    border-radius: 20px;
+    background: #108c70;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: white;
+}
+
+.health div img {
+    height: 60%;
+    object-fit: cover  ;
+}
